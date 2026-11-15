@@ -1,10 +1,10 @@
-import product from "../models/product";
+import Product from "../models/product.js";
 
 //  Create new products 
 
 export const createProducts = async (req, res) => {
     try {
-        const product = await product.create(req.body);
+        const product = await Product.create(req.body);
         res.json({
             message: 'products created sucessfully',
             product,
@@ -46,6 +46,6 @@ export const deleteProduct = async (req, res) => {
         await product.findByIdAndDelete(req.params.id);
         res.json({ message: 'Product delete sucessfully' });
     } catch (error) {
-        res.status(500).json({ message: 'server error', error });
+        res.status(500).json({ message: 'server error hai', error });
     }
 }

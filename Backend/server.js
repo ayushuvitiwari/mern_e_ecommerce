@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import authRoute from './routes/authRoutes.js';
+import productsRoutes from './routes/productRoutes.js'
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api/auth' , authRoute);
+app.use('/api/products', productsRoutes)
 
 app.get('/', (req, res) => {
   res.send('API is running...');
