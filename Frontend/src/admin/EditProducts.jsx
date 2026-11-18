@@ -1,10 +1,12 @@
+
 import { useState, useEffect } from "react";
-import api from '../api/axios'
-import { useNavigate, useParams } from 'react-router'
+import api from '../api/axios';
+import { useNavigate, useParams } from 'react-router-dom';
 
 export default function EditProduct() {
     const { id } = useParams();
     const navigate = useNavigate();
+
     const [form, setform] = useState({
         title: "",
         description: "",
@@ -12,48 +14,79 @@ export default function EditProduct() {
         category: "",
         image: "",
         stock: "",
-    })
+    });
 
-    const allowedFields = ['title', 'description', 'price', 'category', 'image', 'stock']
-
+    const allowedFields = ['title', 'description', 'price', 'category', 'image', 'stock'];
 
     const loadProduct = async () => {
-        const res = await api.get(`/products`);
-        const product = res.data.find((p) => p.id === parseInt(id));
-        setform(product)
-    }
+        try {
+            const res = await api.get('/products');
+
+            const product = res.data.find(
+                (p) => String(p._id) === String(id)
+            );
+
+            if (product) {
+                setform({
+                    title: product.title || "",
+                    description: product.description || "",
+                    price: product.price ?? "",
+                    category: product.category || "",
+                    image: product.image || "",
+                    stock: product.stock ?? "",
+                });
+            } else {
+                console.log("Product not found");
+            }
+
+        } catch (error) {
+            console.log("API Error:", error);
+        }
+    };
+
     useEffect(() => {
         loadProduct();
-    }, []);
+    }, [id]);
 
     const handleChange = (e) => {
         setform({
             ...form,
             [e.target.name]: e.target.value,
         });
-    }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        await api.put(`/products/edit/${id}`,form);
-        alert('product update sucessfully!');
-        navigate('/admin/products');
-    }
+
+        try {
+            await api.put(`/products/update/${id}`, form);
+            alert('Product updated successfully!');
+            navigate('/admin/products');
+        } catch (error) {
+            console.log("Update Error:", error);
+        }
+    };
 
     return (
-        <div className="max-w-lg max-auto mt-10 bg-white p-6 shadow rounded">
+        <div className="max-w-lg mx-auto mt-10 bg-white p-6 shadow rounded">
             <h2 className="text-2xl font-bold mb-6">Edit Product</h2>
+
             <form onSubmit={handleSubmit} className="space-y-3">
-                {
-                    allowedFields.map((key) => (
-                        allowedFields.includes(key) &&
-                        <input key={key} name={key} value={form[key]} onChange={handleChange} placeholder={key} className="w-full p-2 border border-gray-300 rounded" />
-                    ))
-                }
-                <button type="submit" className="w-full bg-blue-500 text-white ">
+                {allowedFields.map((key) => (
+                    <input
+                        key={key}
+                        name={key}
+                        value={form[key]}
+                        onChange={handleChange}
+                        placeholder={key}
+                        className="w-full p-2 border border-gray-300 rounded"
+                    />
+                ))}
+
+                <button type="submit" className="w-full bg-blue-500 text-white p-2">
                     Update Product
                 </button>
             </form>
         </div>
-    )
+    );
 }

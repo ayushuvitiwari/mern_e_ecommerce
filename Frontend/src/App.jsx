@@ -5,8 +5,8 @@ import Login from './Pages/Login'
 import ProductsDetails from './Pages/ProductsDetails'
 import SignUp from './Pages/SignUp'
 import AddProduct from './admin/AddProducts'
-import EditProduct from './admin/ProductsList'
-import ProductList from './admin/EditProducts'
+import EditProduct from './admin/EditProducts'
+import ProductList from './admin/ProductsList'
 
 const App = () => {
   return (

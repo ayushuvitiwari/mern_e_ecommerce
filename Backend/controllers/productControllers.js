@@ -18,18 +18,28 @@ export const createProducts = async (req, res) => {
 
 export const getProducts = async (req, res) => {
     try {
-        const products = await product.find().sort({ createdAt: -1 });
+        const {search, category} = req.query;
+
+        let filter = {};
+
+        if(search){
+            filter.title = {$regex: search, $options: 'i'};
+        };
+        if(category){
+            filter.category = category;
+        };
+        const products = await Product.find(filter).sort({ createdAt: -1 });
         res.json(products);
     } catch (error) {
         res.status(500).json({ message: 'server error', error });
     }
 };
 
-// updated a products 
+// updated a products
 
 export const updateProducts = async (req, res) => {
     try {
-        const updated = await product.findByIdAndUpdate(
+        const updated = await Product.findByIdAndUpdate(
             req.params.id,
             req.body,
             { new: true }
@@ -43,7 +53,7 @@ export const updateProducts = async (req, res) => {
 
 export const deleteProduct = async (req, res) => {
     try {
-        await product.findByIdAndDelete(req.params.id);
+        await Product.findByIdAndDelete(req.params.id);
         res.json({ message: 'Product delete sucessfully' });
     } catch (error) {
         res.status(500).json({ message: 'server error hai', error });

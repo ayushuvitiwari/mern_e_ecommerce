@@ -18,7 +18,7 @@ export default function AddProducts() {
     const handleChange = (e) =>{
         setform({
             ...form,
-            [e.terget.name]: e.target.value,
+            [e.target.name]: e.target.value,
         })
     }
 

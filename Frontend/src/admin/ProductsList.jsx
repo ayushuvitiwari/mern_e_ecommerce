@@ -1,24 +1,27 @@
 import { useEffect, useState } from "react";
 import api from '../api/axios';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 
 export default function ProductList() {
     const [products, setproducts] = useState([])
 
     const loadProducts = async () => {
-        const response = await api.get('./products')
-        setproducts(response.data)
-    }
+        try {
+            const response = await api.get('/products');
+            setproducts(response.data);
+        } catch (error) {
+            console.log("API Error:", error);
+        }
+    };
     const deletedProduct = async (id) => {
-       try {
-        await api.delete(`/products/delete/${id}`);
-        alert('product deleted sucessfully !');
-        loadProducts();
-       } catch (error) {
-        console.log('error deleting products', error);
-        
-        
-       }
+        try {
+            await api.delete(`/products/delete/${id}`);
+            alert('product deleted sucessfully !');
+            loadProducts();
+        } catch (error) {
+            console.log('error deleting products', error);
+
+        }
     }
 
     useEffect(() => {
@@ -46,16 +49,16 @@ export default function ProductList() {
 
                 <tbody>
                     {
-                        products.map((product)=>(
-                            <tr key={product.id} className="text-center">
+                        products.map((product) => (
+                            <tr key={product._id} className="text-center">
                                 <td className="border border-gray-200 px-4 py-2">{product.title}</td>
                                 <td className="border border-gray-200 px-4 py-2">{product.price}</td>
                                 <td className="border border-gray-200 px-4 py-2">{product.stock}</td>
                                 <td className="border border-gray-200 px-4 py-2">
-                                    <Link to={`/admin/products/edit/${product.id}`} className="text-center">
-                                    Edit
+                                    <Link to={`/admin/products/edit/${product._id}`} className="text-center">
+                                        Edit
                                     </Link>
-                                    <button onClick={()=>deletedProduct(product.id)} className="text-red-500 hover:underline">
+                                    <button onClick={() => deletedProduct(product._id)} className="text-red-500 hover:underline">
                                         Delete
                                     </button>
                                 </td>
