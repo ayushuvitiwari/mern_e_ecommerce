@@ -1,5 +1,6 @@
 import React from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
+
 import Home from './Pages/Home'
 import Login from './Pages/Login'
 import ProductsDetails from './Pages/ProductsDetails'
@@ -7,24 +8,57 @@ import SignUp from './Pages/SignUp'
 import AddProduct from './admin/AddProducts'
 import EditProduct from './admin/EditProducts'
 import ProductList from './admin/ProductsList'
+import Navbar from './Components/Navbar';
+import Cart from './Pages/cart'
 
-const App = () => {
+function Layout() {
   return (
     <>
-      <Router>
-        <Routes>
-          <Route path='/' element={<Home />} />
-          <Route path='/login' element={<Login />} />
-          <Route path='/signup' element={<SignUp />} />
-          <Route path='/product/:id' element={<ProductsDetails />} />
-
-          <Route path='/admin/products' element={<ProductList/>}/>
-          <Route path='/admin/products/add' element={<AddProduct/>}/>
-          <Route path='/admin/products/edit/:id' element={<EditProduct/>}/>
-        </Routes>
-      </Router>
+      <Navbar />
+      <Outlet />
     </>
   )
+}
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Layout />,
+    children: [
+      {
+        index: true,
+        element: <Home />
+      },
+      {
+        path: 'login',
+        element: <Login />
+      },
+      {
+        path: 'signup',
+        element: <SignUp />
+      },
+      {
+        path: 'product/:id',
+        element: <ProductsDetails />
+      },
+      {
+        path: 'admin/products',
+        element: <ProductList />
+      },
+      {
+        path: 'admin/products/add',
+        element: <AddProduct />
+      },
+      {
+        path: 'admin/products/edit/:id',
+        element: <EditProduct />
+      }
+    ]
+  }
+]);
+
+const App = () => {
+  return <RouterProvider router={router} />
 }
 
 export default App

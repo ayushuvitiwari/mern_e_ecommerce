@@ -1,4 +1,4 @@
-import Cart from '../models/cart'
+import Cart from '../models/Cart.js'
 
 
 // Add to cart to item  
@@ -92,4 +92,15 @@ export const updateQuanttity = async (req,res)=>{
 
 
 // get cart by user id
+
+export const getCart = async (req,res)=>{
+    try {
+        const {userId} = req.params;
+        
+        const cart = await Cart.findOne({userId}).populate('items.productId');
+        res.json(cart);
+    } catch (error) {
+       res.status(500).json({message: 'server error', error}) 
+    }
+}
 

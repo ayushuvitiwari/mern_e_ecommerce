@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import authRoute from './routes/authRoutes.js';
 import productsRoutes from './routes/productRoutes.js'
+import cartRoutes from './routes/cart.js'
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ app.use(express.json());
 
 app.use('/api/auth' , authRoute);
 app.use('/api/products', productsRoutes)
+app.use('/api/cart', cartRoutes)
 
 app.get('/', (req, res) => {
   res.send('API is running...');
