@@ -27,6 +27,7 @@ const Login = () => {
       // save token localstorage
 
       localStorage.setItem("token", res.data.token);
+      localStorage.setItem('userId', res.data.user.id);
       setmsg('Login Sucessful');
       console.log("Login Response:", res.data);
 
