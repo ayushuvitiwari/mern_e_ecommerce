@@ -10,6 +10,8 @@ import EditProduct from './admin/EditProducts'
 import ProductList from './admin/ProductsList'
 import Navbar from './Components/Navbar';
 import Cart from './Pages/cart'
+import Checkout from './Pages/Checkout'
+import checkoutAddress from './Pages/CheckOutAddress'
 
 function Layout() {
   return (
@@ -52,6 +54,18 @@ const router = createBrowserRouter([
       {
         path: 'admin/products/edit/:id',
         element: <EditProduct />
+      },
+      {
+        path: 'cart',
+        element: <Cart /> 
+      },
+      {
+        path: 'checkout',
+        element: <Checkout />
+      },
+      { 
+        path: 'checkout/address',
+        element: <checkoutAddress />
       }
     ]
   }

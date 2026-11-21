@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import api from '../api/axios';
+import { useNavigate } from "react-router-dom";
 
 
 export default function Cart() {
+    const navigation = useNavigate();
+
     const userId = localStorage.getItem('userId');
     const [Cart, setCart] = useState([]);
 
@@ -57,7 +60,7 @@ export default function Cart() {
                 ) : (
                     <div className="space-y-4">
                         {
-                            Cart.items.map((item)=>(
+                            Cart.items.map((item) => (
                                 <div key={item.productId._id} className="flex items-center justify-between p-4 border rounded">
                                     <div className="flex items-center gap-4">
                                         <img src={item.productId.image} alt={item.productId.title} className="w-16 h-16 object-cover rounded" />
@@ -69,12 +72,12 @@ export default function Cart() {
                                     </div>
 
                                     <div className="flex items-center gap-2">
-                                        <button onClick={()=> updateQty(item.productId._id, item.quantity - 1)} className="px-2 py-1 bg-gray-200 rounded">
+                                        <button onClick={() => updateQty(item.productId._id, item.quantity - 1)} className="px-2 py-1 bg-gray-200 rounded">
                                             -
                                         </button>
 
                                         <span>{item.quantity}</span>
-                                        <button onClick={()=> updateQty(item.productId._id, item.quantity + 1)} className="px-2 py-1 bg-gray-200 rounded">
+                                        <button onClick={() => updateQty(item.productId._id, item.quantity + 1)} className="px-2 py-1 bg-gray-200 rounded">
                                             +
                                         </button>
                                     </div>
@@ -84,7 +87,7 @@ export default function Cart() {
                                             ${(item.productId.price * item.quantity).toFixed(2)}
                                         </p>
                                     </div>
-                                    <button onClick={()=> removeItem(item.productId._id)} className="text-red-500">
+                                    <button onClick={() => removeItem(item.productId._id)} className="text-red-500">
                                         Remove
                                     </button>
                                 </div>
@@ -97,6 +100,9 @@ export default function Cart() {
                                 Total: ${total.toFixed(2)}
                             </h2>
                         </div>
+                        <button onClick={() => navigation('/checkout/address')} className="mt-4 px-4 py-2 bg-blue-500 text-white rounded">
+                            Proceed to Checkout
+                        </button>
                     </div>
                 )
             }
