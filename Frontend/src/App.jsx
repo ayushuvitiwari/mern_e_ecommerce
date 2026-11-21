@@ -1,25 +1,28 @@
-import React from 'react'
+import React from 'react';
 import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 
-import Home from './Pages/Home'
-import Login from './Pages/Login'
-import ProductsDetails from './Pages/ProductsDetails'
-import SignUp from './Pages/SignUp'
-import AddProduct from './admin/AddProducts'
-import EditProduct from './admin/EditProducts'
-import ProductList from './admin/ProductsList'
+import Home from './Pages/Home';
+import Login from './Pages/Login';
+import ProductsDetails from './Pages/ProductsDetails';
+import SignUp from './Pages/SignUp';
+import AddProduct from './admin/AddProducts';
+import EditProduct from './admin/EditProducts';
+import ProductList from './admin/ProductsList';
 import Navbar from './Components/Navbar';
-import Cart from './Pages/cart'
-import Checkout from './Pages/Checkout'
-import checkoutAddress from './Pages/CheckOutAddress'
+import Cart from './Pages/cart';
+import Checkout from './Pages/Checkout';
+import CheckOutAddress from './Pages/CheckOutAddress';
+import OrderSuccess from './Pages/OrderSucess';
 
 function Layout() {
   return (
-    <>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
-      <Outlet />
-    </>
-  )
+      <main className="flex-1">
+        <Outlet />
+      </main>
+    </div>
+  );
 }
 
 const router = createBrowserRouter([
@@ -57,22 +60,26 @@ const router = createBrowserRouter([
       },
       {
         path: 'cart',
-        element: <Cart /> 
+        element: <Cart />
       },
       {
         path: 'checkout',
         element: <Checkout />
       },
-      { 
+      {
         path: 'checkout/address',
-        element: <checkoutAddress />
+        element: <CheckOutAddress />
+      },
+      {
+        path: 'order/success/:id',
+        element: <OrderSuccess />
       }
     ]
   }
 ]);
 
 const App = () => {
-  return <RouterProvider router={router} />
-}
+  return <RouterProvider router={router} />;
+};
 
-export default App
+export default App;

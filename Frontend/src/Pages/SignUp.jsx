@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
-import api from '../api/axios'
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import api from '../api/axios';
 
 const SignUp = () => {
-
   const [form, setform] = useState({
     name: "",
     email: "",
@@ -10,48 +10,115 @@ const SignUp = () => {
   });
 
   const [msg, setmsg] = useState('');
+  const [isError, setIsError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setform({
       ...form, [e.target.name]: e.target.value
     });
-  }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsError(false);
+    setmsg('');
+    setLoading(true);
 
     try {
-      const responce = await api.post("/auth/signup", form);
-      setmsg(responce.data.message);
+      const response = await api.post("/auth/signup", form);
+      setmsg(response.data.message || "Registration successful!");
+      setIsError(false);
+      setTimeout(() => {
+        navigate('/login');
+      }, 1000);
     } catch (err) {
-      setmsg(err.response?.data?.message || "Server Error");
+      setIsError(true);
+      setmsg(err.response?.data?.message || "Server Error. Please try again.");
+    } finally {
+      setLoading(false);
     }
-  }
+  };
+
   return (
-    <>
-      <div className='flex items-center justify-center min-h-screen bg-gray-100 px-4'>
-        <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
-          <h2 className='text-2xl font-bold mb-6 text-center'>Create Account</h2>
-
-          {msg && (
-            <div className="text-sm font-medium text-blue-600 p-3 rounded mb-4 text-center">
-              {msg}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className='space-y-4'>
-            <input type="text" name='name' placeholder='Enter Name' value={form.name} onChange={handleChange} className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 required' />
-
-            <input type="email" name='email' placeholder='Enter Email' value={form.email} onChange={handleChange} className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 required' />
-
-            <input type="password" name='password' placeholder='Enter Password' value={form.password} onChange={handleChange} className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 required' />
-
-            <button type='submit' className='w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors'>Sign Up</button>
-          </form>
+    <div className='flex min-h-[80vh] items-center justify-center px-4 py-8'>
+      <div className="bg-white p-8 sm:p-10 rounded-3xl shadow-sm border border-slate-200/90 w-full max-w-md">
+        
+        <div className="text-center mb-8">
+          <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-3 font-bold text-xl">
+            ✨
+          </div>
+          <h2 className='text-2xl sm:text-3xl font-black text-slate-900 tracking-tight'>Create Account</h2>
+          <p className='text-slate-500 text-xs sm:text-sm mt-1'>Join Ayush Store for exclusive deals</p>
         </div>
-      </div>
-    </>
-  )
-}
 
-export default SignUp
+        {msg && (
+          <div className={`text-xs font-bold p-3.5 rounded-xl mb-4 text-center border ${
+            isError ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+          }`}>
+            {msg}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className='space-y-4'>
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Full Name *</label>
+            <input 
+              type="text" 
+              name='name' 
+              placeholder='e.g. Ayush Tiwari' 
+              value={form.name} 
+              onChange={handleChange} 
+              required
+              className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition' 
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Email Address *</label>
+            <input 
+              type="email" 
+              name='email' 
+              placeholder='e.g. user@gmail.com' 
+              value={form.email} 
+              onChange={handleChange} 
+              required
+              className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition' 
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Password *</label>
+            <input 
+              type="password" 
+              name='password' 
+              placeholder='Create secure password' 
+              value={form.password} 
+              onChange={handleChange} 
+              required
+              className='w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition' 
+            />
+          </div>
+
+          <button 
+            type='submit' 
+            disabled={loading}
+            className='w-full bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white py-3.5 px-4 rounded-xl font-bold text-xs shadow-md shadow-indigo-200 transition cursor-pointer'
+          >
+            {loading ? 'Registering...' : 'Complete Sign Up'}
+          </button>
+        </form>
+
+        <p className="mt-6 text-center text-xs text-slate-500">
+          Already registered?{' '}
+          <Link to="/login" className="font-bold text-indigo-600 hover:underline">
+            Sign In here
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default SignUp;

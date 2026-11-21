@@ -16,32 +16,34 @@ const orderSchema = new mongoose.Schema(
                 },
                 quantity: {
                     type: Number,
+                    default: 1
                 },
                 price: {
                     type: Number,
+                    required: true
                 },
-            }],
-
+            }
+        ],
         address: {
-            fullName: string,
-            address: string,
-            city: string,
-            state: string,
-            pinCode: string,
+            type: mongoose.Schema.Types.Mixed,
+            required: true
         },
-        totalAmount: Number,
+        totalAmount: {
+            type: Number,
+            required: true
+        },
         paymentMethod: {
             type: String,
             default: "COD"
         },
         status: {
+            type: String,
             default: "placed",
         },
-
-    }, {
-    timestamps: true,
-}
+    },
+    {
+        timestamps: true,
+    }
 );
-
 
 export default mongoose.model("Order", orderSchema);
