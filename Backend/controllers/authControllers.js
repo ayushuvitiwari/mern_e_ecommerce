@@ -1,12 +1,14 @@
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import transporter from '../config/mail.js';
 
 const ADMIN_EMAIL = 'ayushuvitiwari9091@gmail.com';
 const ADMIN_PASSWORD = '0016';
 
-// Helper to seed/ensure default Admin exists
-const ensureAdminUser = async () => {
+
+// Ensure default Admin exists in database
+export const ensureAdminUser = async () => {
     try {
         let admin = await User.findOne({ email: ADMIN_EMAIL });
         if (!admin) {
@@ -14,12 +16,21 @@ const ensureAdminUser = async () => {
             await User.create({
                 name: 'Ayush (Admin)',
                 email: ADMIN_EMAIL,
-                password: hashPassword
+                password: hashPassword,
+                role: 'admin'
             });
+
+            safeSendMail({
+                from: process.env.Email || 'ayushuvitiwari9091@gmail.com',
+                to: process.env.Email,
+                subject: 'Admin Login Successful - Ayush Store 🔐',
+                text: `Dear Admin, \n You have successfully logged in to Ayush Store Admin Panel. \n Your admin account is now active. You can manage products, customers, orders and store activities. \n Thank you, \n Ayush Store Team`
+            });
+
             console.log('Default Admin user created successfully.');
         }
     } catch (err) {
-        console.error('Error ensuring admin user:', err);
+        console.error('Error ensuring admin user:', err.message);
     }
 };
 
@@ -27,11 +38,15 @@ const ensureAdminUser = async () => {
 export const signupUser = async (req, res) => {
     try {
         const { name, email, password } = req.body;
-        const normalizedEmail = email ? email.toLowerCase().trim() : '';
 
-        // check user already exists 
+        if (!name || !email || !password) {
+            return res.status(400).json({ message: "Please enter all required fields" });
+        }
+
+        const normalizedEmail = email.toLowerCase().trim();
+
+        // Check if user already exists 
         const userExists = await User.findOne({ email: normalizedEmail });
-
         if (userExists) {
             return res.status(400).json({ message: "User already exists with this email" });
         }
@@ -39,17 +54,34 @@ export const signupUser = async (req, res) => {
         // Hash password
         const hashPassword = await bcrypt.hash(password, 10);
 
-        // create user
+        // Create user
         const newUser = await User.create({
-            name, 
+            name: name.trim(),
             email: normalizedEmail,
             password: hashPassword,
+            role: normalizedEmail === ADMIN_EMAIL ? 'admin' : 'user'
         });
 
-        res.status(201).json({ message: "User registered successfully" });
+        // Send welcome email asynchronously without blocking signup
+        safeSendMail({
+            from: `"Ayush Store" <${process.env.Email}>` || 'ayushuvitiwari9091@gmail.com',
+            to: normalizedEmail,
+            subject: "Welcome to Ayush Store! 🎉",
+            text: `Dear ${name},\n\nWelcome to Ayush Store! Thank you for signing up with us.\nNow you can explore our products and enjoy shopping.\n\nHappy Shopping!\nBest Regards,\nAyush Store Team`
+        });
+
+        res.status(201).json({
+            message: "User registered successfully",
+            user: {
+                id: newUser._id,
+                name: newUser.name,
+                email: newUser.email,
+                role: newUser.role
+            }
+        });
     } catch (error) {
         console.error("Signup error:", error);
-        res.status(500).json({ message: "Server error", error: error.message });
+        res.status(500).json({ message: "Server error during registration", error: error.message });
     }
 };
 
@@ -57,55 +89,69 @@ export const signupUser = async (req, res) => {
 export const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const normalizedEmail = email ? email.toLowerCase().trim() : '';
 
-        // Check if admin login credentials
+        if (!email || !password) {
+            return res.status(400).json({ message: "Please provide email and password" });
+        }
+
+        const normalizedEmail = email.toLowerCase().trim();
         const isAdmin = normalizedEmail === ADMIN_EMAIL && password === ADMIN_PASSWORD;
 
         // Check user in database
         let user = await User.findOne({ email: normalizedEmail });
 
-        // If it is the special admin credentials and not yet saved in DB, create on the fly
+        // If admin logs in with fixed 0016 password and record doesn't exist yet, create it
         if (isAdmin && !user) {
             const hashPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
             user = await User.create({
                 name: 'Ayush (Admin)',
                 email: ADMIN_EMAIL,
-                password: hashPassword
+                password: hashPassword,
+                role: 'admin'
             });
         }
 
         if (!user) {
-            return res.status(400).json({ message: "User not found with this email" });
+            return res.status(400).json({ message: "Invalid email or password" });
         }
 
-        // Compare password (if not already matched via admin bypass)
+        // Verify password
         if (!isAdmin) {
             const match = await bcrypt.compare(password, user.password);
             if (!match) {
-                return res.status(400).json({ message: "Incorrect email or password" });
+                return res.status(400).json({ message: "Invalid email or password" });
             }
         }
 
+        const role = isAdmin || user.role === 'admin' ? 'admin' : 'user';
+
         // Generate JWT Token
         const token = jwt.sign(
-            { id: user._id, role: isAdmin ? 'admin' : 'user' },
+            { id: user._id, role },
             process.env.JWT_SECRET || 'MYJWTSECRETKEY123',
             { expiresIn: "7d" }
         );
 
-        res.json({ 
-            message: isAdmin ? "Admin Login Successful" : "Login Successful",
-            token, 
+        // Send login notification mail asynchronously without blocking login
+        safeSendMail({
+            from: `"Ayush Store" <${process.env.Email}>` || 'ayushuvitiwari9091@gmail.com',
+            to: normalizedEmail,
+            subject: 'Welcome Back to Ayush Store! 🛍️',
+            text: `Dear ${user.name},\n\nYou have successfully logged in to your Ayush Store account.\nExplore our latest products and enjoy your shopping experience.\n\nBest Regards,\nAyush Store Team`
+        });
+
+        res.json({
+            message: role === 'admin' ? "Admin Login Successful" : "Login Successful",
+            token,
             user: {
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                role: isAdmin ? 'admin' : 'user'
+                role
             }
         });
     } catch (error) {
         console.error("Login error:", error);
-        res.status(500).json({ message: "Server error", error: error.message });
+        res.status(500).json({ message: "Server error during login", error: error.message });
     }
 };

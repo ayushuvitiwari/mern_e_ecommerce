@@ -7,6 +7,7 @@ import productsRoutes from './routes/productRoutes.js';
 import cartRoutes from './routes/cart.js';
 import orderRoutes from './routes/order.js';
 import addressRoutes from './routes/address.js';
+import { ensureAdminUser } from './controllers/authControllers.js';
 
 dotenv.config();
 
@@ -26,7 +27,8 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-connectDB().then(() => {
+connectDB().then(async () => {
+  await ensureAdminUser();
   app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
