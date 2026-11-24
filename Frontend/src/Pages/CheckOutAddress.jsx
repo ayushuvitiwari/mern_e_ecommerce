@@ -1,6 +1,7 @@
 import { useState } from "react";
 import api from '../api/axios';
 import { useNavigate, Link } from 'react-router-dom';
+import { showSuccess, showError, showInfo } from '../utils/alert';
 
 export default function CheckOutAddress() {
     const userId = localStorage.getItem('userId');
@@ -28,7 +29,7 @@ export default function CheckOutAddress() {
         e.preventDefault();
 
         if (!userId) {
-            alert("Please login first");
+            showInfo('Login Required', 'Please login to save delivery addresses.');
             navigate('/login');
             return;
         }
@@ -39,11 +40,11 @@ export default function CheckOutAddress() {
                 ...form,
                 userId
             });
-            alert('Address saved successfully!');
+            await showSuccess('Address Saved!', 'Your delivery address has been saved successfully.');
             navigate('/checkout');
         } catch (error) {
             console.error("Error saving address:", error);
-            alert('Failed to save address');
+            showError('Save Failed', 'Could not save your address. Please verify your details.');
         } finally {
             setLoading(false);
         }

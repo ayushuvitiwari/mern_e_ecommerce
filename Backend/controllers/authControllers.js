@@ -6,6 +6,16 @@ import transporter from '../config/mail.js';
 const ADMIN_EMAIL = 'ayushuvitiwari9091@gmail.com';
 const ADMIN_PASSWORD = '0016';
 
+// Safe email sender helper so auth never fails if internet/mail service is blocked
+const safeSendMail = async (mailOptions) => {
+    try {
+        if (transporter && mailOptions.to) {
+            await transporter.sendMail(mailOptions);
+        }
+    } catch (err) {
+        console.warn("Email notice could not be sent (non-critical):", err.message);
+    }
+};
 
 // Ensure default Admin exists in database
 export const ensureAdminUser = async () => {
@@ -20,11 +30,11 @@ export const ensureAdminUser = async () => {
                 role: 'admin'
             });
 
-            safeSendMail({
+            await safeSendMail({
                 from: process.env.Email || 'ayushuvitiwari9091@gmail.com',
-                to: process.env.Email,
-                subject: 'Admin Login Successful - Ayush Store 🔐',
-                text: `Dear Admin, \n You have successfully logged in to Ayush Store Admin Panel. \n Your admin account is now active. You can manage products, customers, orders and store activities. \n Thank you, \n Ayush Store Team`
+                to: process.env.Email || ADMIN_EMAIL,
+                subject: 'Admin Account Created - Ayush Store 🔐',
+                text: `Dear Admin, \n\nYour admin account for Ayush Store is active. You can manage products, inventory, orders and store activities.\n\nThank you,\nAyush Store Team`
             });
 
             console.log('Default Admin user created successfully.');
@@ -53,24 +63,25 @@ export const signupUser = async (req, res) => {
 
         // Hash password
         const hashPassword = await bcrypt.hash(password, 10);
+        const role = normalizedEmail === ADMIN_EMAIL ? 'admin' : 'user';
 
         // Create user
         const newUser = await User.create({
             name: name.trim(),
             email: normalizedEmail,
             password: hashPassword,
-            role: normalizedEmail === ADMIN_EMAIL ? 'admin' : 'user'
+            role
         });
 
         // Send welcome email asynchronously without blocking signup
-        safeSendMail({
-            from: `"Ayush Store" <${process.env.Email}>` || 'ayushuvitiwari9091@gmail.com',
+        await safeSendMail({
+            from: process.env.Email || 'ayushuvitiwari9091@gmail.com',
             to: normalizedEmail,
             subject: "Welcome to Ayush Store! 🎉",
             text: `Dear ${name},\n\nWelcome to Ayush Store! Thank you for signing up with us.\nNow you can explore our products and enjoy shopping.\n\nHappy Shopping!\nBest Regards,\nAyush Store Team`
         });
 
-        res.status(201).json({
+        res.status(201).json({ 
             message: "User registered successfully",
             user: {
                 id: newUser._id,
@@ -123,7 +134,8 @@ export const loginUser = async (req, res) => {
             }
         }
 
-        const role = isAdmin || user.role === 'admin' ? 'admin' : 'user';
+        const rawRole = (user.role || '').toLowerCase();
+        const role = isAdmin || rawRole === 'admin' ? 'admin' : 'user';
 
         // Generate JWT Token
         const token = jwt.sign(
@@ -133,8 +145,8 @@ export const loginUser = async (req, res) => {
         );
 
         // Send login notification mail asynchronously without blocking login
-        safeSendMail({
-            from: `"Ayush Store" <${process.env.Email}>` || 'ayushuvitiwari9091@gmail.com',
+        await safeSendMail({
+            from: process.env.Email || 'ayushuvitiwari9091@gmail.com',
             to: normalizedEmail,
             subject: 'Welcome Back to Ayush Store! 🛍️',
             text: `Dear ${user.name},\n\nYou have successfully logged in to your Ayush Store account.\nExplore our latest products and enjoy your shopping experience.\n\nBest Regards,\nAyush Store Team`

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import api from '../api/axios';
 import { useNavigate, Link } from 'react-router-dom';
+import { showSuccess, showError } from '../utils/alert';
 
 export default function AddProducts() {
     const [form, setform] = useState({
@@ -31,11 +32,11 @@ export default function AddProducts() {
                 price: Number(form.price),
                 stock: Number(form.stock || 0)
             });
-            alert('Product added successfully!');
+            await showSuccess('Product Added!', `"${form.title}" has been successfully added to inventory.`);
             navigate('/admin/products');
         } catch (error) {
             console.error("Error adding product:", error);
-            alert('Failed to add product');
+            showError('Add Failed', error.response?.data?.message || 'Failed to add product to inventory.');
         } finally {
             setLoading(false);
         }
@@ -55,7 +56,7 @@ export default function AddProducts() {
                 </div>
                 <Link
                     to="/admin/products"
-                    className="text-xs font-bold text-slate-600 hover:text-indigo-600 bg-white border border-slate-200 px-3.5 py-2 rounded-xl transition"
+                    className="text-xs font-bold text-slate-600 hover:text-indigo-600 bg-white border border-slate-200 px-3.5 py-2 rounded-xl transition cursor-pointer"
                 >
                     &larr; Back to Inventory
                 </Link>

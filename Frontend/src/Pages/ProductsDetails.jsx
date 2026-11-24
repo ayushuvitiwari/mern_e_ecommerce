@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { showConfirm, showError, toast } from '../utils/alert';
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -29,8 +30,16 @@ export default function ProductDetails() {
     const userId = localStorage.getItem('userId');
 
     if (!userId) {
-      alert('Please log in to add items to your cart.');
-      navigate('/login');
+      const confirmed = await showConfirm({
+        title: 'Sign In Required',
+        text: 'Please log in to your account to add items to your shopping cart.',
+        confirmButtonText: 'Go to Login',
+        cancelButtonText: 'Cancel',
+        icon: 'info'
+      });
+      if (confirmed) {
+        navigate('/login');
+      }
       return;
     }
 
@@ -38,9 +47,10 @@ export default function ProductDetails() {
       setAdding(true);
       await api.post(`/cart/add`, { userId, productId: product._id });
       window.dispatchEvent(new Event('cartUpdated'));
+      toast('Item added to cart!', 'success');
     } catch (error) {
       console.error("Error adding to cart:", error);
-      alert('Failed to add item to cart');
+      showError('Failed to Add Item', error.response?.data?.message || 'Something went wrong while adding to cart.');
     } finally {
       setTimeout(() => setAdding(false), 600);
     }
@@ -73,7 +83,7 @@ export default function ProductDetails() {
 
   return (
     <div className='max-w-6xl mx-auto px-4 sm:px-6 py-8'>
-      
+
       {/* Breadcrumb Navigation */}
       <nav className="mb-6 flex items-center gap-2 text-xs font-semibold text-slate-400">
         <Link to="/" className="hover:text-indigo-600 transition">Home</Link>
@@ -86,13 +96,13 @@ export default function ProductDetails() {
       {/* Main Product Card Showcase */}
       <div className='bg-white rounded-3xl shadow-sm border border-slate-200/90 p-6 sm:p-10'>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 items-center">
-          
+
           {/* Left: Product Image Box */}
           <div className="md:col-span-6 flex justify-center p-6 sm:p-8 bg-gradient-to-b from-slate-50 to-slate-100/70 rounded-3xl border border-slate-100 relative overflow-hidden group">
-            <img 
-              src={product.image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80'} 
-              alt={product.title} 
-              className='max-h-80 sm:max-h-96 w-auto object-contain group-hover:scale-105 transition duration-500' 
+            <img
+              src={product.image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80'}
+              alt={product.title}
+              className='max-h-80 sm:max-h-96 w-auto object-contain group-hover:scale-105 transition duration-500'
             />
             {discountPercent > 0 && (
               <span className="absolute top-4 left-4 bg-rose-500 text-white text-xs font-black px-2.5 py-1 rounded-full shadow-sm">
@@ -135,11 +145,10 @@ export default function ProductDetails() {
 
             {/* Stock indicator */}
             <div>
-              <span className={`text-xs font-bold px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 ${
-                product.stock > 0 
-                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                  : 'bg-rose-50 text-rose-700 border border-rose-200'
-              }`}>
+              <span className={`text-xs font-bold px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 ${product.stock > 0
+                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                : 'bg-rose-50 text-rose-700 border border-rose-200'
+                }`}>
                 <span className={`w-2 h-2 rounded-full ${product.stock > 0 ? 'bg-emerald-500' : 'bg-rose-500'}`}></span>
                 {product.stock > 0 ? `Ready to Dispatch (${product.stock} units left)` : 'Currently Out of Stock'}
               </span>
@@ -153,16 +162,15 @@ export default function ProductDetails() {
 
             {/* Action Buttons */}
             <div className="pt-4 flex flex-col sm:flex-row gap-3">
-              <button 
-                onClick={addToCart} 
+              <button
+                onClick={addToCart}
                 disabled={product.stock <= 0 || adding}
-                className={`flex-1 py-4 px-6 rounded-2xl font-bold text-sm transition-all duration-200 shadow-md flex items-center justify-center gap-2 cursor-pointer ${
-                  product.stock <= 0 
-                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none' 
-                    : adding 
-                    ? 'bg-emerald-600 text-white shadow-emerald-200' 
+                className={`flex-1 py-4 px-6 rounded-2xl font-bold text-sm transition-all duration-200 shadow-md flex items-center justify-center gap-2 cursor-pointer ${product.stock <= 0
+                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
+                  : adding
+                    ? 'bg-emerald-600 text-white shadow-emerald-200'
                     : 'bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white shadow-indigo-200 hover:shadow-indigo-300'
-                }`}
+                  }`}
               >
                 {adding ? (
                   <>
@@ -178,8 +186,8 @@ export default function ProductDetails() {
                 )}
               </button>
 
-              <button 
-                onClick={() => navigate('/cart')} 
+              <button
+                onClick={() => navigate('/cart')}
                 className="py-4 px-6 rounded-2xl font-bold text-sm border-2 border-slate-200 text-slate-700 hover:bg-slate-50 transition cursor-pointer"
               >
                 Go to Cart &rarr;

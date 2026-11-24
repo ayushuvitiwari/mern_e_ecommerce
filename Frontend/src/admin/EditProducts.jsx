@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import api from '../api/axios';
 import { useNavigate, useParams, Link } from 'react-router-dom';
+import { showSuccess, showError } from '../utils/alert';
 
 export default function EditProduct() {
     const { id } = useParams();
@@ -34,6 +35,7 @@ export default function EditProduct() {
             }
         } catch (error) {
             console.error("API Error loading product:", error);
+            showError('Load Failed', 'Could not load the product data for editing.');
         } finally {
             setLoading(false);
         }
@@ -60,11 +62,11 @@ export default function EditProduct() {
                 price: Number(form.price),
                 stock: Number(form.stock || 0)
             });
-            alert('Product updated successfully!');
+            await showSuccess('Product Updated!', 'Product details updated successfully in inventory.');
             navigate('/admin/products');
         } catch (error) {
             console.error("Update Error:", error);
-            alert('Failed to update product');
+            showError('Update Failed', error.response?.data?.message || 'Failed to update product details.');
         } finally {
             setUpdating(false);
         }
@@ -88,7 +90,7 @@ export default function EditProduct() {
                 </div>
                 <Link
                     to="/admin/products"
-                    className="text-xs font-bold text-slate-600 hover:text-indigo-600 bg-white border border-slate-200 px-3.5 py-2 rounded-xl transition"
+                    className="text-xs font-bold text-slate-600 hover:text-indigo-600 bg-white border border-slate-200 px-3.5 py-2 rounded-xl transition cursor-pointer"
                 >
                     &larr; Back to Inventory
                 </Link>
@@ -199,8 +201,8 @@ export default function EditProduct() {
                         >
                             Cancel
                         </button>
-                        <button 
-                            type="submit" 
+                        <button
+                            type="submit"
                             disabled={updating}
                             className="w-1/2 py-3.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-xs rounded-xl shadow-md shadow-indigo-200 transition cursor-pointer"
                         >

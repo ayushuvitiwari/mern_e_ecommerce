@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from '../api/axios';
 import { Link } from 'react-router-dom';
+import { showConfirm, showSuccess, showError, toast } from '../utils/alert';
 
 export default function ProductList() {
     const [products, setProducts] = useState([]);
@@ -15,21 +16,30 @@ export default function ProductList() {
             setProducts(response.data);
         } catch (error) {
             console.error("API Error loading products:", error);
+            showError('Database Error', 'Could not load products from the backend.');
         } finally {
             setLoading(false);
         }
     };
 
     const deleteProduct = async (id, title) => {
-        if (!window.confirm(`Are you sure you want to delete "${title || 'this product'}"?`)) return;
+        const confirmed = await showConfirm({
+            title: 'Delete Product?',
+            text: `Are you sure you want to delete "${title || 'this product'}"? This action cannot be undone.`,
+            confirmButtonText: 'Yes, Delete',
+            confirmButtonColor: '#ef4444',
+            icon: 'warning'
+        });
+
+        if (!confirmed) return;
 
         try {
             await api.delete(`/products/delete/${id}`);
-            alert('Product deleted successfully!');
+            toast('Product deleted successfully!', 'success');
             loadProducts();
         } catch (error) {
             console.error('Error deleting product:', error);
-            alert('Failed to delete product');
+            showError('Delete Failed', 'Failed to delete the selected product.');
         }
     };
 
@@ -68,13 +78,13 @@ export default function ProductList() {
                 <div className="flex items-center gap-3">
                     <Link 
                         to='/' 
-                        className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-50 transition"
+                        className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-50 transition cursor-pointer"
                     >
                         View Storefront
                     </Link>
                     <Link 
                         to='/admin/products/add' 
-                        className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-200 transition flex items-center gap-1.5"
+                        className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-200 transition flex items-center gap-1.5 cursor-pointer"
                     >
                         <span>+ Add New Product</span>
                     </Link>
@@ -130,7 +140,7 @@ export default function ProductList() {
                         {adminSearch && (
                             <button
                                 onClick={() => setAdminSearch('')}
-                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 text-xs"
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
                             >
                                 ✕
                             </button>
@@ -222,7 +232,7 @@ export default function ProductList() {
                                         <td className="px-6 py-4 text-right space-x-2">
                                             <Link 
                                                 to={`/admin/products/edit/${product._id}`} 
-                                                className="px-3 py-1.5 rounded-lg text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition inline-block"
+                                                className="px-3 py-1.5 rounded-lg text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 transition inline-block cursor-pointer"
                                             >
                                                 Edit
                                             </Link>

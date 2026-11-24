@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import api from '../api/axios';
 import { useNavigate, Link } from "react-router-dom";
+import { showConfirm, showError, showInfo } from '../utils/alert';
 
 export default function Checkout() {
     const userId = localStorage.getItem('userId');
@@ -74,9 +75,19 @@ export default function Checkout() {
 
     const handlePlaceOrder = async () => {
         if (!selectedAddress) {
-            alert('Please select or add a delivery address');
+            showInfo('Address Required', 'Please select or add a delivery address to place your order.');
             return;
         }
+
+        const confirmed = await showConfirm({
+            title: 'Confirm Order?',
+            text: `Place Cash on Delivery order for ₹${total.toLocaleString()} to ${selectedAddress.city}?`,
+            confirmButtonText: 'Confirm & Place Order',
+            confirmButtonColor: '#10b981',
+            icon: 'question'
+        });
+
+        if (!confirmed) return;
 
         try {
             setPlacing(true);
@@ -89,7 +100,7 @@ export default function Checkout() {
             navigate(`/order/success/${res.data.orderId}`);
         } catch (error) {
             console.error("Error placing order:", error);
-            alert(error.response?.data?.message || 'Failed to place order');
+            showError('Order Failed', error.response?.data?.message || 'Could not place your order. Please try again.');
         } finally {
             setPlacing(false);
         }

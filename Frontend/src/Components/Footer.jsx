@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { showInfo } from '../utils/alert';
 
 export default function Footer({ onCategoryClick }) {
   const categories = ['Laptops', 'Mobiles', 'Tablets', 'Electronics', 'Accessories'];
@@ -9,7 +10,7 @@ export default function Footer({ onCategoryClick }) {
       {/* Main Footer Links */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10">
-
+          
           {/* Brand Info */}
           <div className="lg:col-span-2 space-y-4">
             <Link to='/' className='flex items-center gap-2.5 group'>
@@ -22,7 +23,7 @@ export default function Footer({ onCategoryClick }) {
                 Ayush <span className="text-indigo-400 font-bold">Store</span>
               </span>
             </Link>
-
+            
             <p className="text-slate-400 text-sm leading-relaxed max-w-sm">
               Your trusted destination for authentic electronics, top-tier laptops, flagship smartphones, and audio gear. Best quality delivered directly to your doorstep.
             </p>
@@ -43,7 +44,7 @@ export default function Footer({ onCategoryClick }) {
             <ul className="space-y-2 text-sm">
               {categories.map((cat) => (
                 <li key={cat}>
-                  <button
+                  <button 
                     onClick={() => onCategoryClick && onCategoryClick(cat)}
                     className="text-slate-400 hover:text-indigo-400 transition cursor-pointer text-left"
                   >
@@ -62,7 +63,18 @@ export default function Footer({ onCategoryClick }) {
               <li><Link to="/checkout" className="hover:text-indigo-400 transition">Checkout</Link></li>
               <li><Link to="/checkout/address" className="hover:text-indigo-400 transition">Delivery Address</Link></li>
               <li><Link to="/admin/products" className="hover:text-indigo-400 transition">Inventory Admin</Link></li>
-              <li><a href="#track" onClick={(e) => { e.preventDefault(); alert("Use the order confirmation ID received at checkout to track your delivery."); }} className="hover:text-indigo-400 transition">Track Your Order</a></li>
+              <li>
+                <a 
+                  href="#track" 
+                  onClick={(e) => { 
+                    e.preventDefault(); 
+                    showInfo("Track Your Order", "Use the order confirmation reference ID received at checkout to track your delivery status."); 
+                  }} 
+                  className="hover:text-indigo-400 transition cursor-pointer"
+                >
+                  Track Your Order
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -74,13 +86,13 @@ export default function Footer({ onCategoryClick }) {
                 <span>📍</span> <span>Lucknow, Uttar Pradesh, India</span>
               </li>
               <li className="flex items-center gap-2">
-                <span>📞</span>
+                <span>📞</span> 
                 <a href="tel:9335049033" className="hover:text-indigo-400 transition">
                   9335049033
                 </a>
               </li>
               <li className="flex items-center gap-2">
-                <span>✉️</span>
+                <span>✉️</span> 
                 <a href="mailto:ayushuvitiwari9091@gmail.com" className="hover:text-indigo-400 transition break-all">
                   ayushuvitiwari9091@gmail.com
                 </a>
@@ -99,9 +111,36 @@ export default function Footer({ onCategoryClick }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <p>© {new Date().getFullYear()} Ayush Store eCommerce. All rights reserved.</p>
           <div className="flex gap-6">
-            <a href="#privacy" onClick={(e) => { e.preventDefault(); alert("Privacy Policy: Your data is safe and encrypted."); }} className="hover:text-slate-300 transition">Privacy Policy</a>
-            <a href="#terms" onClick={(e) => { e.preventDefault(); alert("Terms of Service: Free return within 7 days on all electronics."); }} className="hover:text-slate-300 transition">Terms of Service</a>
-            <a href="#security" onClick={(e) => { e.preventDefault(); alert("100% Secure Checkout with SSL encryption."); }} className="hover:text-slate-300 transition">Security</a>
+            <a 
+              href="#privacy" 
+              onClick={(e) => { 
+                e.preventDefault(); 
+                showInfo("Privacy Policy", "Your data and passwords are secure with SSL encryption and we never share your details."); 
+              }} 
+              className="hover:text-slate-300 transition cursor-pointer"
+            >
+              Privacy Policy
+            </a>
+            <a 
+              href="#terms" 
+              onClick={(e) => { 
+                e.preventDefault(); 
+                showInfo("Terms of Service", "We offer 7-day hassle-free returns and verified brand warranties on all electronics."); 
+              }} 
+              className="hover:text-slate-300 transition cursor-pointer"
+            >
+              Terms of Service
+            </a>
+            <a 
+              href="#security" 
+              onClick={(e) => { 
+                e.preventDefault(); 
+                showInfo("Security", "100% Secure Checkout with verified Cash on Delivery protection."); 
+              }} 
+              className="hover:text-slate-300 transition cursor-pointer"
+            >
+              Security
+            </a>
           </div>
         </div>
       </div>

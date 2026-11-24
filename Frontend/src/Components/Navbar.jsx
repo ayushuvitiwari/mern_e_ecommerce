@@ -1,6 +1,7 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import api from '../api/axios';
+import { showConfirm, toast } from '../utils/alert';
 
 export default function Navbar() {
     const navigate = useNavigate();
@@ -9,7 +10,7 @@ export default function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [navSearch, setNavSearch] = useState('');
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    
+
     const userId = localStorage.getItem('userId');
     const userName = localStorage.getItem('userName');
     const userRole = localStorage.getItem('userRole');
@@ -76,21 +77,32 @@ export default function Navbar() {
         }
     };
 
-    const logOut = () => {
+    const logOut = async () => {
+        const confirmed = await showConfirm({
+            title: 'Logout Account?',
+            text: 'Are you sure you want to sign out of Ayush Store?',
+            confirmButtonText: 'Yes, Sign Out',
+            cancelButtonText: 'Stay Logged In',
+            confirmButtonColor: '#ef4444'
+        });
+
+        if (!confirmed) return;
+
         localStorage.clear();
         setCartCount(0);
         setMobileMenuOpen(false);
         window.dispatchEvent(new Event('cartUpdated'));
+        toast('Logged out successfully', 'info');
         navigate('/login');
     };
 
     return (
         <header className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-200/60' : 'bg-white border-b border-slate-100'}`}>
             <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-                
+
                 {/* Main Top Bar */}
                 <div className="flex justify-between items-center h-16 sm:h-20 gap-2 sm:gap-4 lg:gap-6">
-                    
+
                     {/* Brand Logo with Ayush Store text */}
                     <Link to='/' className='flex items-center gap-2 sm:gap-2.5 group shrink-0'>
                         <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-sky-400 flex items-center justify-center text-white shadow-md shadow-indigo-200 group-hover:scale-105 transition duration-300">
@@ -106,7 +118,7 @@ export default function Navbar() {
                         </div>
                     </Link>
 
-                    {/* Desktop / Tablet Search Bar (Hidden on small mobile, rendered below) */}
+                    {/* Desktop / Tablet Search Bar */}
                     <form onSubmit={handleSearchSubmit} className="hidden md:flex flex-1 max-w-sm lg:max-w-lg mx-2 lg:mx-4">
                         <div className="relative flex items-center w-full group">
                             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-indigo-500">
@@ -114,7 +126,7 @@ export default function Navbar() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.3} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
-                            
+
                             <input
                                 type="text"
                                 placeholder="Search gadgets, mobiles, laptops..."
@@ -147,11 +159,11 @@ export default function Navbar() {
 
                     {/* Right Action Icons & Mobile Toggles */}
                     <div className='flex items-center gap-1.5 sm:gap-3 shrink-0'>
-                        
-                        {/* Admin Dashboard Button (Only for Admin - Desktop/Tablet) */}
+
+                        {/* Admin Dashboard Button (Only for Admin) */}
                         {isAdmin && (
-                            <Link 
-                                to='/admin/products' 
+                            <Link
+                                to='/admin/products'
                                 className='hidden sm:flex px-3.5 py-2 text-xs font-bold text-white bg-gradient-to-r from-indigo-600 via-indigo-700 to-violet-700 hover:from-indigo-700 hover:to-violet-800 rounded-xl shadow-xs transition items-center gap-1.5'
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -163,8 +175,8 @@ export default function Navbar() {
                         )}
 
                         {/* Cart Button */}
-                        <Link 
-                            to='/cart' 
+                        <Link
+                            to='/cart'
                             className='relative p-2 sm:p-2.5 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-indigo-600 transition flex items-center justify-center'
                             aria-label="Shopping Cart"
                         >
@@ -182,14 +194,14 @@ export default function Navbar() {
                         <div className="hidden sm:flex items-center gap-2">
                             {!userId ? (
                                 <>
-                                    <Link 
-                                        to='/login' 
+                                    <Link
+                                        to='/login'
                                         className='px-3.5 py-2 text-xs sm:text-sm font-bold text-slate-700 hover:text-indigo-600 rounded-xl hover:bg-slate-50 transition'
                                     >
                                         Log In
                                     </Link>
-                                    <Link 
-                                        to='/signup' 
+                                    <Link
+                                        to='/signup'
                                         className='px-4 py-2 text-xs sm:text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-xs shadow-indigo-200 transition'
                                     >
                                         Register
@@ -203,8 +215,8 @@ export default function Navbar() {
                                             {isAdmin && <span className="ml-1 text-[10px] text-indigo-600 font-extrabold uppercase">(Admin)</span>}
                                         </span>
                                     </div>
-                                    <button 
-                                        onClick={logOut} 
+                                    <button
+                                        onClick={logOut}
                                         className='p-1.5 sm:px-3 sm:py-2 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-xl transition flex items-center gap-1 cursor-pointer'
                                         title="Logout"
                                     >
@@ -237,7 +249,7 @@ export default function Navbar() {
                     </div>
                 </div>
 
-                {/* Mobile Dedicated Search Bar (Visible on mobile screens) */}
+                {/* Mobile Dedicated Search Bar */}
                 <div className="md:hidden pb-3 pt-1">
                     <form onSubmit={handleSearchSubmit} className="w-full">
                         <div className="relative flex items-center w-full">
@@ -276,11 +288,11 @@ export default function Navbar() {
                 {/* Mobile Dropdown Menu Drawer */}
                 {mobileMenuOpen && (
                     <div className="sm:hidden py-4 border-t border-slate-100 space-y-3 bg-white/95 backdrop-blur-md rounded-2xl p-4 shadow-xl mb-3 border border-slate-100 animate-in fade-in slide-in-from-top-2 duration-200">
-                        
+
                         {/* Admin Link on Mobile if logged in as Admin */}
                         {isAdmin && (
-                            <Link 
-                                to='/admin/products' 
+                            <Link
+                                to='/admin/products'
                                 onClick={() => setMobileMenuOpen(false)}
                                 className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-indigo-50 to-violet-50 border border-indigo-100 text-indigo-700 font-bold text-xs"
                             >
@@ -292,16 +304,16 @@ export default function Navbar() {
                             </Link>
                         )}
 
-                        <Link 
-                            to='/' 
+                        <Link
+                            to='/'
                             onClick={() => setMobileMenuOpen(false)}
                             className="block px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50"
                         >
                             🛍️ Store Catalog
                         </Link>
 
-                        <Link 
-                            to='/cart' 
+                        <Link
+                            to='/cart'
                             onClick={() => setMobileMenuOpen(false)}
                             className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50"
                         >
@@ -319,15 +331,15 @@ export default function Navbar() {
                         <div className="pt-2 border-t border-slate-100">
                             {!userId ? (
                                 <div className="flex gap-2">
-                                    <Link 
-                                        to='/login' 
+                                    <Link
+                                        to='/login'
                                         onClick={() => setMobileMenuOpen(false)}
                                         className="w-1/2 py-2.5 text-center text-xs font-bold text-indigo-600 border border-indigo-200 rounded-xl hover:bg-indigo-50"
                                     >
                                         Log In
                                     </Link>
-                                    <Link 
-                                        to='/signup' 
+                                    <Link
+                                        to='/signup'
                                         onClick={() => setMobileMenuOpen(false)}
                                         className="w-1/2 py-2.5 text-center text-xs font-bold text-white bg-indigo-600 rounded-xl shadow-xs"
                                     >
@@ -340,8 +352,8 @@ export default function Navbar() {
                                         <p className="text-xs font-bold text-slate-800">{userName || 'User'}</p>
                                         <p className="text-[10px] text-slate-400">{userEmail}</p>
                                     </div>
-                                    <button 
-                                        onClick={logOut} 
+                                    <button
+                                        onClick={logOut}
                                         className="px-3 py-1.5 text-xs font-bold text-rose-600 bg-rose-50 rounded-lg hover:bg-rose-100 cursor-pointer"
                                     >
                                         Logout

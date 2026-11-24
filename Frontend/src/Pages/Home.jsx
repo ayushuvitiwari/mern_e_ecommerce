@@ -5,6 +5,7 @@ import HeroSlider from '../Components/HeroSlider';
 import ProductCard from '../Components/ProductCard';
 import MiniProductCard from '../Components/MiniProductCard';
 import Footer from '../Components/Footer';
+import { showConfirm, showError, toast } from '../utils/alert';
 
 const CATEGORIES = [
   { id: '', label: 'All Products', icon: '⚡' },
@@ -79,8 +80,16 @@ export default function Home() {
     const userId = localStorage.getItem('userId');
 
     if (!userId) {
-      alert('Please log in to add items to your cart.');
-      navigate('/login');
+      const confirmed = await showConfirm({
+        title: 'Sign In Required',
+        text: 'Please log in to your account to add items to your shopping cart.',
+        confirmButtonText: 'Go to Login',
+        cancelButtonText: 'Cancel',
+        icon: 'info'
+      });
+      if (confirmed) {
+        navigate('/login');
+      }
       return;
     }
 
@@ -88,9 +97,10 @@ export default function Home() {
       setAddingId(productId);
       await api.post(`/cart/add`, { userId, productId });
       window.dispatchEvent(new Event('cartUpdated'));
+      toast('Item added to cart!', 'success');
     } catch (error) {
       console.error("Error adding to cart:", error);
-      alert('Failed to add item to cart');
+      showError('Failed to Add Item', error.response?.data?.message || 'Something went wrong while adding to cart.');
     } finally {
       setTimeout(() => setAddingId(null), 500);
     }
@@ -113,7 +123,7 @@ export default function Home() {
             {category && (
               <button 
                 onClick={() => setCategory('')} 
-                className="text-xs font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-3 py-1.5 rounded-lg transition"
+                className="text-xs font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 px-3 py-1.5 rounded-lg transition cursor-pointer"
               >
                 Clear Filter ✕
               </button>
